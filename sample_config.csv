@@ -1,0 +1,80 @@
+parameter,value,label,valid_range,notes
+current_age,60,Current Age,25-75,Primary earner age
+retirement_age,65,Retirement Age,45-80,Target retirement age
+life_expectancy,95,Life Expectancy,75-100,Planning horizon
+spouse_age,,Spouse Current Age,25-75 or blank,Blank if no spouse
+spouse_life_expectancy,98,Spouse Life Expectancy,75-100,Spouse planning horizon
+total_portfolio_value,600000.0,Total Portfolio Value ($),computed,Read-only; sum of balances
+traditional_balance,500000.0,Traditional Balance ($),>= 0,401k/IRA pre-tax
+roth_balance,100000.0,Roth Balance ($),>= 0,Roth IRA/401k
+taxable_balance,0.0,Taxable Balance ($),>= 0,Brokerage account
+annual_contribution,0.0,Annual Contribution ($),>= 0,Today's dollars
+contribution_growth_rate,0.02,Contribution Growth Rate,0.0-0.10,Decimal (e.g. 0.02 = 2%)
+annual_withdrawal_real,50000.0,Primary Withdrawal ($),>= 0,Real $/year
+withdrawal_start_age,65,Primary Withdrawal Start Age,40-85,Age primary begins draw
+withdrawal_method,fixed_real,Withdrawal Method,fixed_real|fixed_nominal|percentage|guardrails,
+withdrawal_rate,0.04,Withdrawal Rate,0.005-0.10,Decimal (percentage method)
+withdrawal_floor,0.03,Guardrails Floor,0.0-0.10,Min % (guardrails)
+withdrawal_ceiling,0.05,Guardrails Ceiling,0.0-0.10,Max % (guardrails)
+pre_retirement_allocation.us_large_cap,0.85,Pre-Ret Alloc: us_large_cap,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.us_small_cap,0.0,Pre-Ret Alloc: us_small_cap,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.international_dev,0.0,Pre-Ret Alloc: international_dev,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.emerging_markets,0.0,Pre-Ret Alloc: emerging_markets,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.us_bonds,0.0,Pre-Ret Alloc: us_bonds,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.tips,0.0,Pre-Ret Alloc: tips,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.cash,0.15,Pre-Ret Alloc: cash,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+pre_retirement_allocation.reits,0.0,Pre-Ret Alloc: reits,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.us_large_cap,0.7,Ret Alloc: us_large_cap,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.us_small_cap,0.0,Ret Alloc: us_small_cap,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.international_dev,0.0,Ret Alloc: international_dev,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.emerging_markets,0.0,Ret Alloc: emerging_markets,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.us_bonds,0.0,Ret Alloc: us_bonds,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.tips,0.1,Ret Alloc: tips,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.cash,0.2,Ret Alloc: cash,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+retirement_allocation.reits,0.0,Ret Alloc: reits,0.0-1.0 or 0-100,Decimal weight; all must sum to 1.0
+use_glide_path,True,Use Glide Path,True|False,Linear transition
+rebalance_threshold,0.05,Rebalance Threshold,0.0-0.20,Drift threshold (e.g. 0.05 = 5%)
+simulation_method,gbm,Simulation Method,bootstrap|gbm,
+n_simulations,10000,Number of Simulations,100-100000,Monte Carlo paths
+random_seed,,Random Seed,int or blank,For reproducibility
+filing_status,single,Filing Status,single|married_filing_jointly,
+state_tax_rate,0.05,State Tax Rate,0.0-0.15,Decimal (e.g. 0.05 = 5%)
+include_state_tax,False,Include State Tax,True|False,
+ss_monthly_benefit_at_fra,2500.0,SS Monthly Benefit at FRA ($),>= 0,Primary earner
+ss_fra,67,SS Full Retirement Age,62-70,Primary
+ss_claiming_age,67,SS Claiming Age,62-70,Primary
+spouse_ss_monthly_benefit_at_fra,0.0,Spouse SS Monthly at FRA ($),>= 0,
+spouse_ss_claiming_age,67,Spouse SS Claiming Age,62-70,
+include_spousal_benefit,True,Include Spousal Benefit,True|False,
+pension_annual_real,0.0,Pension Annual ($),>= 0,Primary pension
+pension_start_age,67,Pension Start Age,45-95,
+rental_income_annual_real,0.0,Rental Income Annual ($),>= 0,Net Schedule E
+part_time_income_annual,0.0,Part-time Income Annual ($),>= 0,Primary earner
+part_time_income_end_age,65,Part-time End Age,25-100,
+pension_end_age,95,Pension End Age,45-100,Default 95 = lifetime
+rental_start_age,69,Rental Start Age,25-100,
+rental_end_age,95,Rental End Age,25-100,
+part_time_income_start_age,55,Part-time Start Age,25-100,
+simulation_start_year,2026,Simulation Start Year,2020-2040,Calendar year for current_age
+serp_2026,0.0,SERP 2026 ($),>= 0,Nominal contractual
+serp_2027,0.0,SERP 2027 ($),>= 0,Nominal contractual
+serp_2028,0.0,SERP 2028 ($),>= 0,Nominal contractual
+serp_2029,0.0,SERP 2029 ($),>= 0,Nominal contractual
+serp_2030,0.0,SERP 2030 ($),>= 0,Nominal contractual
+serp_2031,0.0,SERP 2031 ($),>= 0,Nominal contractual
+serp_2032,0.0,SERP 2032 ($),>= 0,Nominal contractual
+serp_2033,0.0,SERP 2033 ($),>= 0,Nominal contractual
+spend_annual_real,80000.0,Annual Spend (Real $),>= 0,Discretionary/lifestyle in today's dollars
+spend_start_age,60,Spend Start Age,25-100,Age annual spend begins
+spend_surplus_mode,ignore,Spend Surplus Mode,ignore|reinvest,What to do when income > spend
+healthcare_is_real,True,Healthcare Is Real,True|False,True = inflation-adjusted
+pension_is_real,False,Pension Is Real (COLA),True|False,False = nominal/fixed
+part_time_is_real,False,Part-time Is Real,True|False,True = inflation-adjusted
+expense_ratio,0.001,Expense Ratio,0.0-0.05,Decimal (e.g. 0.001 = 10 bps)
+advisory_fee,0.005,Advisory Fee,0.0-0.03,Decimal (e.g. 0.005 = 50 bps)
+inflation_method,fixed,Inflation Method,bootstrap|fixed|mean_reverting,
+inflation_mean,0.025,Inflation Mean,0.0-0.10,Decimal
+inflation_std,0.015,Inflation Std Dev,0.0-0.05,Decimal
+healthcare_inflation_premium,0.02,Healthcare Inflation Premium,0.0-0.05,Extra above CPI
+annual_healthcare_cost_real,12000.0,Healthcare Annual Cost ($),>= 0,Today's dollars
+include_healthcare_costs,True,Include Healthcare Costs,True|False,

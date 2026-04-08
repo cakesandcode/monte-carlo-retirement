@@ -1,0 +1,32 @@
+# Retirement Financial Modeling — Dependencies
+# Python 3.10+
+# Install: pip install -r requirements.txt
+
+# Core scientific stack
+numpy>=1.26.0
+pandas>=2.0.3
+scipy>=1.11.4
+matplotlib>=3.7.0
+python-docx>=1.1.0
+
+# Market data
+yfinance>=0.2.36
+pandas-datareader>=0.10.0
+
+# Streamlit UI
+streamlit>=1.32.0
+
+# Charting
+plotly>=5.18.0
+
+# Excel I/O
+openpyxl>=3.1.2
+xlsxwriter>=3.1.9
+
+# Testing
+pytest>=7.4.4
+pytest-cov>=4.1.0
+
+# Utilities
+requests>=2.31.0
+python-dateutil>=2.8.2
