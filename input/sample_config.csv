@@ -1,0 +1,80 @@
+parameter,value,label,valid_range,notes
+current_age,55,Current Age,25-75,Primary earner age
+retirement_age,62,Retirement Age,45-80,Target retirement age
+life_expectancy,92,Life Expectancy,75-100,Planning horizon
+spouse_age,,Spouse Current Age,25-75 or blank,Blank — single filer
+spouse_life_expectancy,,Spouse Life Expectancy,75-100,Blank — single filer
+total_portfolio_value,1250000.0,Total Portfolio Value ($),computed,Read-only; sum of balances
+traditional_balance,800000.0,Traditional Balance ($),>= 0,401k/IRA pre-tax
+roth_balance,250000.0,Roth Balance ($),>= 0,Roth IRA/401k
+taxable_balance,200000.0,Taxable Balance ($),>= 0,Brokerage account
+annual_contribution,23000.0,Annual Contribution ($),>= 0,Today's dollars — maxing 401k + catch-up
+contribution_growth_rate,0.02,Contribution Growth Rate,0.0-0.10,Decimal (e.g. 0.02 = 2%)
+annual_withdrawal_real,40000.0,Primary Withdrawal ($),>= 0,Real $/year — moderate lifestyle
+withdrawal_start_age,62,Primary Withdrawal Start Age,40-85,Starts at retirement
+withdrawal_method,fixed_real,Withdrawal Method,fixed_real|fixed_nominal|percentage|guardrails,
+withdrawal_rate,0.04,Withdrawal Rate,0.005-0.10,Decimal (percentage method)
+withdrawal_floor,0.03,Guardrails Floor,0.0-0.10,Min % (guardrails)
+withdrawal_ceiling,0.05,Guardrails Ceiling,0.0-0.10,Max % (guardrails)
+pre_retirement_allocation.us_large_cap,0.50,Pre-Ret Alloc: us_large_cap,0.0-1.0 or 0-100,Diversified growth
+pre_retirement_allocation.us_small_cap,0.10,Pre-Ret Alloc: us_small_cap,0.0-1.0 or 0-100,Small cap tilt
+pre_retirement_allocation.international_dev,0.10,Pre-Ret Alloc: international_dev,0.0-1.0 or 0-100,International diversification
+pre_retirement_allocation.emerging_markets,0.05,Pre-Ret Alloc: emerging_markets,0.0-1.0 or 0-100,EM exposure
+pre_retirement_allocation.us_bonds,0.15,Pre-Ret Alloc: us_bonds,0.0-1.0 or 0-100,Fixed income anchor
+pre_retirement_allocation.tips,0.05,Pre-Ret Alloc: tips,0.0-1.0 or 0-100,Inflation protection
+pre_retirement_allocation.cash,0.05,Pre-Ret Alloc: cash,0.0-1.0 or 0-100,Liquidity buffer
+pre_retirement_allocation.reits,0.0,Pre-Ret Alloc: reits,0.0-1.0 or 0-100,No REITs pre-ret
+retirement_allocation.us_large_cap,0.35,Ret Alloc: us_large_cap,0.0-1.0 or 0-100,Moderate equity
+retirement_allocation.us_small_cap,0.05,Ret Alloc: us_small_cap,0.0-1.0 or 0-100,Small cap
+retirement_allocation.international_dev,0.10,Ret Alloc: international_dev,0.0-1.0 or 0-100,International
+retirement_allocation.emerging_markets,0.0,Ret Alloc: emerging_markets,0.0-1.0 or 0-100,No EM in retirement
+retirement_allocation.us_bonds,0.25,Ret Alloc: us_bonds,0.0-1.0 or 0-100,Bond ladder
+retirement_allocation.tips,0.10,Ret Alloc: tips,0.0-1.0 or 0-100,Inflation hedge
+retirement_allocation.cash,0.10,Ret Alloc: cash,0.0-1.0 or 0-100,2-year cash buffer
+retirement_allocation.reits,0.05,Ret Alloc: reits,0.0-1.0 or 0-100,Income diversification
+use_glide_path,True,Use Glide Path,True|False,Linear transition to retirement allocation
+rebalance_threshold,0.05,Rebalance Threshold,0.0-0.20,Drift threshold (e.g. 0.05 = 5%)
+simulation_method,bootstrap,Simulation Method,bootstrap|gbm,Historical bootstrap — more realistic tails
+n_simulations,1000,Number of Simulations,100-100000,Monte Carlo paths
+random_seed,42,Random Seed,int or blank,Reproducible results for demo
+filing_status,single,Filing Status,single|married_filing_jointly,
+state_tax_rate,0.05,State Tax Rate,0.0-0.15,Moderate state tax
+include_state_tax,True,Include State Tax,True|False,
+ss_monthly_benefit_at_fra,2800.0,SS Monthly Benefit at FRA ($),>= 0,Typical mid-career earner
+ss_fra,67,SS Full Retirement Age,62-70,Born 1971
+ss_claiming_age,67,SS Claiming Age,62-70,Claim at FRA — no early/late adjustment
+spouse_ss_monthly_benefit_at_fra,0.0,Spouse SS Monthly at FRA ($),>= 0,No spouse
+spouse_ss_claiming_age,67,Spouse SS Claiming Age,62-70,N/A
+include_spousal_benefit,False,Include Spousal Benefit,True|False,Single filer
+pension_annual_real,0.0,Pension Annual ($),>= 0,No pension
+pension_start_age,67,Pension Start Age,45-95,N/A
+rental_income_annual_real,0.0,Rental Income Annual ($),>= 0,No rental income
+part_time_income_annual,24000.0,Part-time Income Annual ($),>= 0,Consulting in early retirement
+part_time_income_end_age,65,Part-time End Age,25-100,Stops at 65
+pension_end_age,95,Pension End Age,45-100,N/A
+rental_start_age,69,Rental Start Age,25-100,N/A
+rental_end_age,95,Rental End Age,25-100,N/A
+part_time_income_start_age,62,Part-time Start Age,25-100,Starts at retirement
+simulation_start_year,2026,Simulation Start Year,2020-2040,Calendar year
+serp_2026,0.0,SERP 2026 ($),>= 0,No SERP
+serp_2027,0.0,SERP 2027 ($),>= 0,No SERP
+serp_2028,0.0,SERP 2028 ($),>= 0,No SERP
+serp_2029,0.0,SERP 2029 ($),>= 0,No SERP
+serp_2030,0.0,SERP 2030 ($),>= 0,No SERP
+serp_2031,0.0,SERP 2031 ($),>= 0,No SERP
+serp_2032,0.0,SERP 2032 ($),>= 0,No SERP
+serp_2033,0.0,SERP 2033 ($),>= 0,No SERP
+spend_annual_real,48000.0,Annual Spend (Real $),>= 0,Moderate lifestyle — housing paid off
+spend_start_age,55,Spend Start Age,25-100,Current age
+spend_surplus_mode,reinvest,Spend Surplus Mode,ignore|reinvest,Reinvest surplus back to portfolio
+healthcare_is_real,True,Healthcare Is Real,True|False,Inflation-adjusted
+pension_is_real,False,Pension Is Real (COLA),True|False,N/A
+part_time_is_real,False,Part-time Is Real,True|False,Nominal consulting income
+expense_ratio,0.0005,Expense Ratio,0.0-0.05,Low-cost index funds (5 bps)
+advisory_fee,0.0,Advisory Fee,0.0-0.03,Self-directed — no advisor
+inflation_method,mean_reverting,Inflation Method,bootstrap|fixed|mean_reverting,Ornstein-Uhlenbeck
+inflation_mean,0.025,Inflation Mean,0.0-0.10,Long-run 2.5% target
+inflation_std,0.012,Inflation Std Dev,0.0-0.05,Moderate vol
+healthcare_inflation_premium,0.02,Healthcare Inflation Premium,0.0-0.05,2% above CPI
+annual_healthcare_cost_real,8000.0,Healthcare Annual Cost ($),>= 0,Pre-Medicare costs
+include_healthcare_costs,True,Include Healthcare Costs,True|False,
