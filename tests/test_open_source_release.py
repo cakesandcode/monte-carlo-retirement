@@ -110,3 +110,31 @@ class TestGitHubTemplates:
     def test_pr_template(self):
         path = os.path.join(REPO_ROOT, ".github", "pull_request_template.md")
         assert os.path.isfile(path), "PR template is missing"
+
+
+class TestLegalDisclaimer:
+    """Verify legal disclaimers are present."""
+
+    def test_readme_has_disclaimer_section(self):
+        with open(os.path.join(REPO_ROOT, "README.md")) as f:
+            content = f.read()
+        assert "## Disclaimer" in content, "README missing Disclaimer section"
+
+    def test_readme_disclaimer_has_key_phrases(self):
+        with open(os.path.join(REPO_ROOT, "README.md")) as f:
+            content = f.read()
+        for phrase in [
+            "educational and informational purposes only",
+            "not financial advice",
+            "Past performance does not guarantee future results",
+            "consult a qualified financial advisor",
+        ]:
+            assert phrase.lower() in content.lower(), f"README disclaimer missing: {phrase}"
+
+    def test_app_has_disclaimer_function(self):
+        with open(os.path.join(REPO_ROOT, "app.py")) as f:
+            content = f.read()
+        assert "_render_disclaimer" in content, "app.py missing _render_disclaimer function"
+        assert "educational and informational purposes only" in content, (
+            "app.py disclaimer missing key phrase"
+        )
