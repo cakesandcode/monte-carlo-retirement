@@ -993,6 +993,20 @@ _CONFIG_SECTIONS = [
 ]
 
 
+def _render_disclaimer():
+    """Render legal disclaimer footer."""
+    st.divider()
+    st.caption(
+        "**Disclaimer:** This software is for educational and informational purposes only. "
+        "It is not financial advice, investment advice, tax advice, or a recommendation to "
+        "buy, sell, or hold any security or pursue any investment strategy. Projections are "
+        "based on historical data and mathematical models that may not reflect future market "
+        "conditions. Past performance does not guarantee future results. Tax calculations "
+        "reflect 2025 IRS rules and may become outdated. Consult a qualified financial advisor, "
+        "tax professional, or attorney before making any financial decisions."
+    )
+
+
 def main():
     """Main Streamlit application."""
     initialize_session_state()
@@ -1001,6 +1015,8 @@ def main():
         _main_tabs_layout()
     else:
         _main_sidebar_layout()
+
+    _render_disclaimer()
 
 
 def _main_sidebar_layout():

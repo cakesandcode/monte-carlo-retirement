@@ -108,6 +108,16 @@ A premium version is available with additional capabilities for advanced financi
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
 
+## Disclaimer
+
+This software is for **educational and informational purposes only**. It is not financial advice, investment advice, tax advice, or a recommendation to buy, sell, or hold any security or pursue any investment strategy.
+
+The simulations, projections, and calculations provided by this tool are based on historical data, assumptions, and mathematical models that may not reflect future market conditions. Past performance does not guarantee future results.
+
+**You should consult a qualified financial advisor, tax professional, or attorney before making any financial decisions.** The authors and contributors of this software accept no liability for any financial losses, damages, or decisions made based on the output of this tool.
+
+Tax calculations reflect 2025 IRS rules and may become outdated. Social Security estimates are approximations and should not be used as the sole basis for claiming decisions.
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
