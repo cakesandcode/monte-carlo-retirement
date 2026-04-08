@@ -82,9 +82,9 @@ class TestSampleConfig:
 
     @pytest.fixture
     def sample_config_path(self):
-        path = os.path.join(REPO_ROOT, "sample_config.csv")
+        path = os.path.join(REPO_ROOT, "input", "sample_config.csv")
         if not os.path.isfile(path):
-            pytest.skip("sample_config.csv not yet created")
+            pytest.skip("input/sample_config.csv not yet created")
         return path
 
     def test_sample_config_loads(self, sample_config_path):

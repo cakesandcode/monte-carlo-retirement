@@ -76,7 +76,7 @@ The simulator is fully configurable through the Streamlit sidebar or via CSV fil
 All parameters are adjustable in the sidebar: ages, balances, allocation targets, spending, Social Security inputs, tax assumptions, and model settings.
 
 ### CSV Import/Export
-Save your configuration to CSV from the sidebar, or load a previously saved configuration. See `sample_config.csv` for the expected format.
+Save your configuration to CSV from the sidebar, or load a previously saved configuration. See `input/sample_config.csv` for the expected format.
 
 ```bash
 # Run with a specific config
