@@ -53,7 +53,7 @@ graph TD
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/monte-carlo-retirement.git
+git clone https://github.com/cakesandcode/monte-carlo-retirement.git
 cd monte-carlo-retirement
 
 # Create virtual environment
