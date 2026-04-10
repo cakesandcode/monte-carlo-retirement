@@ -55,17 +55,21 @@ class SocialSecurityModel:
     # PIA formula percentages (applied to AIME ranges)
     PIA_PERCENTAGES = [0.90, 0.32, 0.15]
 
-    # Full Retirement Age (FRA) by birth year
+    # Full Retirement Age by birth year per SSA rules:
+    # 1943-1954: 66 years (all identical per SSA)
+    # 1955-1959: graduated increase by 2 months per year
+    # 1960+: 67 years
+    # Source: https://www.ssa.gov/benefits/retirement/planner/agereduction.html
     FRA_TABLE = {
         1943: 66,
         1944: 66,
         1945: 66,
         1946: 66,
-        1947: 66 + 2/12,
-        1948: 66 + 4/12,
-        1949: 66 + 6/12,
-        1950: 66 + 8/12,
-        1951: 66 + 10/12,
+        1947: 66,
+        1948: 66,
+        1949: 66,
+        1950: 66,
+        1951: 66,
         1952: 66,
         1953: 66,
         1954: 66,

@@ -26,6 +26,7 @@ Boundary / Edge Cases:
     occur; portfolio values may become astronomical in right tail.
 """
 
+import copy
 import numpy as np
 from typing import Optional
 from config.defaults import SimulationConfig, SimulationResults, ASSET_CLASSES
@@ -133,7 +134,7 @@ class MonteCarloSimulator:
                 # Store inflation rate
                 inflation_rates[sim_idx, year_idx] = inflation_general[sim_idx, year_idx]
 
-                # Increment cumulative inflation
+                # Year 0 = current year (today's dollars). Inflation compounds starting year 1.
                 if year_idx > 0:
                     cum_inflation *= (1.0 + inflation_general[sim_idx, year_idx])
                     cum_healthcare_inflation *= (1.0 + inflation_healthcare[sim_idx, year_idx])
@@ -412,7 +413,9 @@ class MonteCarloSimulator:
             is_retired = current_age >= self.config.retirement_age
 
             ages.append(current_age)
-            cum_inflation *= (1.0 + median_inflation)
+            # Year 0 = current year (today's dollars). Inflation compounds starting year 1.
+            if year_idx > 0:
+                cum_inflation *= (1.0 + median_inflation)
 
             # Process portfolio year
             portfolio_state = self.portfolio_mech.process_year(
@@ -484,19 +487,16 @@ class MonteCarloSimulator:
         for _ in range(20):  # Max iterations
             mid_rate = (low_rate + high_rate) / 2.0
 
-            # Run simulation at this withdrawal rate
-            test_config = self.config
+            # Run simulation at this withdrawal rate (deep copy to avoid mutating original)
+            test_config = copy.deepcopy(self.config)
             test_config.withdrawal_rate = mid_rate
             test_config.withdrawal_method = 'percentage'
 
             # Quick test: use fewer simulations
-            original_sims = test_config.n_simulations
-            test_config.n_simulations = min(1000, original_sims)
+            test_config.n_simulations = min(1000, self.config.n_simulations)
 
             test_sim = MonteCarloSimulator(test_config)
             test_results = test_sim.run()
-
-            test_config.n_simulations = original_sims
 
             success = test_results.success_rate
 
@@ -504,11 +504,11 @@ class MonteCarloSimulator:
                 return mid_rate
 
             if success < target_success:
-                # Success too low; increase withdrawal rate
-                low_rate = mid_rate
-            else:
-                # Success too high; decrease withdrawal rate
+                # Success too low -> need lower withdrawal rate to survive longer
                 high_rate = mid_rate
+            else:
+                # Success high enough -> can afford higher withdrawal rate
+                low_rate = mid_rate
 
         # Return best guess
         return (low_rate + high_rate) / 2.0
@@ -526,7 +526,7 @@ class MonteCarloSimulator:
         Returns:
             Success rate (0.0 to 1.0).
         """
-        test_config = self.config
+        test_config = copy.deepcopy(self.config)
         test_config.withdrawal_method = 'fixed_real'
         test_config.annual_withdrawal_real = withdrawal_real
 
