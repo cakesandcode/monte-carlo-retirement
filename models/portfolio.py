@@ -50,7 +50,7 @@ def _from_dec(d: Decimal) -> float:
     return float(d)
 
 # ── Allocation guard ──────────────────────────────────────────────────────────
-_ALLOC_TOLERANCE = 0.02  # 2 % absolute tolerance for allocation sums
+_ALLOC_TOLERANCE = 0.05  # 5 % absolute tolerance — relaxed to avoid Streamlit slider feedback loops
 
 def _validate_and_normalize_allocation(
     allocation: Dict[str, float],
