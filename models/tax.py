@@ -85,20 +85,23 @@ class TaxCalculator:
 
     # 2025 IRMAA Medicare Surcharge Thresholds (Part B + D combined)
     # Format: (MAGI threshold, annual surcharge per person)
+    # Source: 2025 CMS IRMAA brackets
     IRMAA_THRESHOLDS_SINGLE = [
-        (97000, 0),      # Below first threshold
-        (123000, 280),
-        (153000, 735),
-        (183000, 1190),
-        (float('inf'), 1645),
+        (106000, 0),           # Standard premium (no surcharge)
+        (133000, 1052),        # Tier 1
+        (167000, 2644),        # Tier 2
+        (200000, 4232),        # Tier 3
+        (500000, 5824),        # Tier 4
+        (float('inf'), 6268),  # Tier 5 (highest)
     ]
 
     IRMAA_THRESHOLDS_MFJ = [
-        (194000, 0),
-        (246000, 280),
-        (306000, 735),
-        (366000, 1190),
-        (float('inf'), 1645),
+        (212000, 0),           # Standard premium (no surcharge)
+        (266000, 1052),        # Tier 1
+        (334000, 2644),        # Tier 2
+        (400000, 4232),        # Tier 3
+        (750000, 5824),        # Tier 4
+        (float('inf'), 6268),  # Tier 5 (highest)
     ]
 
     def __init__(self):
