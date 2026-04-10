@@ -190,18 +190,29 @@ class TestNoSessionStateForAllocation:
                 )
 
 
-class TestNoKeyParamOnSliders:
-    """Verify that allocation sliders do not use key= parameter."""
+class TestCleanSliderLabels:
+    """Verify that allocation sliders use key= parameter and labels have no #N suffix."""
 
-    def test_render_sliders_no_key_param(self):
+    def test_render_sliders_has_key_param(self):
         with open(APP_PY) as f:
             source = f.read()
         start = source.find('def render_allocation_sliders(')
         end = source.find('\ndef ', start + 1)
         func_body = source[start:end]
-        # Check slider calls within the function don't have key=
-        slider_calls = [line for line in func_body.split('\n') if 'st.slider(' in line]
-        for line in slider_calls:
-            assert 'key=' not in line, (
-                f"Slider should not use key= parameter: {line.strip()}"
+        # The function body should contain key= as part of the slider call
+        assert 'key=' in func_body, (
+            "render_allocation_sliders should pass key= to st.slider"
+        )
+
+    def test_render_sliders_labels_no_hash(self):
+        with open(APP_PY) as f:
+            source = f.read()
+        start = source.find('def render_allocation_sliders(')
+        end = source.find('\ndef ', start + 1)
+        func_body = source[start:end]
+        # Label lines should not contain #{load_count} or #N patterns
+        label_lines = [line for line in func_body.split('\n') if 'label =' in line]
+        for line in label_lines:
+            assert '#{' not in line and '#N' not in line, (
+                f"Slider label should not contain # suffix: {line.strip()}"
             )

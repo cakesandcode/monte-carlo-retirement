@@ -225,10 +225,11 @@ def render_allocation_sliders(
     cols = [col1, col2]
     for field, display, col_idx in _ALLOC_SLIDER_SPEC:
         with cols[col_idx]:
-            label = f"{label_prefix} {display} #{load_count}" if label_prefix else f"{display} #{load_count}"
+            label = f"{label_prefix} {display}" if label_prefix else display
             updated[field] = st.slider(
                 label, 0.0, 1.0,
                 value=allocation.get(field, 0.0), step=0.01,
+                key=f"alloc_{label_prefix.replace('.','').replace(' ','').lower()}_{field}_{load_count}",
             )
     return updated
 
@@ -263,6 +264,8 @@ def render_allocation_status(
         display_fn = st.warning if deviation <= _ALLOC_TOLERANCE else st.error
         display_fn(f"{label} Allocation: {total:.1%} ({note})")
         if st.button(f"Auto-fix to 100% ({label})", key=f"autofix_{group_key}"):
+            if not hasattr(config, config_field_name):
+                raise AttributeError(f"SimulationConfig has no attribute '{config_field_name}'")
             setattr(config, config_field_name, normalize_allocation(allocation))
             st.rerun()
 
@@ -842,11 +845,12 @@ def build_sidebar_config(containers=None) -> SimulationConfig:
             _age = config.current_age + (yr - config.simulation_start_year)
             with _col:
                 val = st.number_input(
-                    f"SERP {yr} #{_lc}",
+                    f"SERP {yr}",
                     min_value=0.0,
                     value=float(getattr(config, f'serp_{yr}')),
                     step=5000.0,
                     format="%.0f",
+                    key=f"serp_{yr}_{_lc}",
                 )
                 st.caption(f"age {_age}")
                 setattr(config, f'serp_{yr}', val)
