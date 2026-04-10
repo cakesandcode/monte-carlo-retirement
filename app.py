@@ -36,6 +36,7 @@ LAYOUT_MODE = _get_layout_mode()
 
 from config.defaults import SimulationConfig, SimulationResults, ASSET_CLASSES
 from models.simulation import MonteCarloSimulator
+from models.portfolio import _ALLOC_TOLERANCE
 from utils.charts import (
     portfolio_fan_chart,
     success_probability_chart,
@@ -187,6 +188,86 @@ st.markdown(
 # fmt_k and fmt_m are imported from utils.helpers.
 # Both are now aliases for fmt_dollar — unified magnitude-aware formatting:
 #   >= $1M → "$X.XXM",  >= $1K → "$X.XK",  < $1K → "$X".
+
+# ── Allocation slider spec: (field_name, display_label, column_index) ────────
+# column_index 0 = left column (equities), 1 = right column (fixed income)
+_ALLOC_SLIDER_SPEC = [
+    ("us_large_cap",      "US Large Cap",      0),
+    ("us_small_cap",      "US Small Cap",      0),
+    ("international_dev", "Intl Developed",    0),
+    ("emerging_markets",  "Emerging Markets",  0),
+    ("us_bonds",          "US Bonds",          1),
+    ("tips",              "TIPS",              1),
+    ("cash",              "Cash",              1),
+    ("reits",             "REITs",             1),
+]
+
+
+def render_allocation_sliders(
+    allocation: dict,
+    label_prefix: str,
+    load_count: int,
+) -> dict:
+    """Render 8 asset-class sliders in two columns. Returns updated allocation dict.
+
+    Does NOT normalize — the caller decides whether to normalize or warn.
+
+    Args:
+        allocation: Current allocation dict (keys match _ALLOC_SLIDER_SPEC field names).
+        label_prefix: Prefix for slider labels (e.g. "Ret." or "").
+        load_count: CSV load counter for label uniqueness.
+
+    Returns:
+        Updated allocation dict with slider values.
+    """
+    updated = allocation.copy()
+    col1, col2 = st.columns(2)
+    cols = [col1, col2]
+    for field, display, col_idx in _ALLOC_SLIDER_SPEC:
+        with cols[col_idx]:
+            label = f"{label_prefix} {display}" if label_prefix else display
+            updated[field] = st.slider(
+                label, 0.0, 1.0,
+                value=allocation.get(field, 0.0), step=0.01,
+                key=f"alloc_{label_prefix.replace('.','').replace(' ','').lower()}_{field}_{load_count}",
+            )
+    return updated
+
+
+def render_allocation_status(
+    total: float,
+    label: str,
+    group_key: str,
+    allocation: dict,
+    config_field_name: str,
+    config,
+) -> None:
+    """Display allocation status and optional auto-fix button.
+
+    Args:
+        total: Sum of allocation weights.
+        label: Human-readable group label (e.g. "Pre-Retirement").
+        group_key: Unique key suffix for the auto-fix button.
+        allocation: Current allocation dict.
+        config_field_name: Attribute name on config to write normalized result.
+        config: SimulationConfig instance.
+    """
+    deviation = abs(total - 1.0)
+    if deviation <= 0.001:
+        st.success(f"{label} Allocation: {total:.1%}")
+    else:
+        remaining = 1.0 - total
+        if remaining >= 0:
+            note = f"{remaining:.1%} remaining"
+        else:
+            note = f"{-remaining:.1%} over"
+        display_fn = st.warning if deviation <= _ALLOC_TOLERANCE else st.error
+        display_fn(f"{label} Allocation: {total:.1%} ({note})")
+        if st.button(f"Auto-fix to 100% ({label})", key=f"autofix_{group_key}"):
+            if not hasattr(config, config_field_name):
+                raise AttributeError(f"SimulationConfig has no attribute '{config_field_name}'")
+            setattr(config, config_field_name, normalize_allocation(allocation))
+            st.rerun()
 
 
 def fmt_monthly(v: float) -> str:
@@ -567,96 +648,24 @@ def build_sidebar_config(containers=None) -> SimulationConfig:
     with _section("Allocation"):
         _lc = st.session_state.get('_csv_load_count', 0)
         st.write("**Pre-Retirement Allocation**")
-        col1, col2 = st.columns(2)
-        with col1:
-            config.pre_retirement_allocation['us_large_cap'] = st.slider(
-                f"US Large Cap #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['us_large_cap'], step=0.01
-            )
-            config.pre_retirement_allocation['us_small_cap'] = st.slider(
-                f"US Small Cap #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['us_small_cap'], step=0.01
-            )
-            config.pre_retirement_allocation['international_dev'] = st.slider(
-                f"Intl Developed #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['international_dev'], step=0.01
-            )
-            config.pre_retirement_allocation['emerging_markets'] = st.slider(
-                f"Emerging Markets #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['emerging_markets'], step=0.01
-            )
-        with col2:
-            config.pre_retirement_allocation['us_bonds'] = st.slider(
-                f"US Bonds #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['us_bonds'], step=0.01
-            )
-            config.pre_retirement_allocation['tips'] = st.slider(
-                f"TIPS #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['tips'], step=0.01
-            )
-            config.pre_retirement_allocation['cash'] = st.slider(
-                f"Cash #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['cash'], step=0.01
-            )
-            config.pre_retirement_allocation['reits'] = st.slider(
-                f"REITs #{_lc}", 0.0, 1.0,
-                value=config.pre_retirement_allocation['reits'], step=0.01
-            )
-
-        pre_total = sum(config.pre_retirement_allocation.values())
-        if abs(pre_total - 1.0) > 0.01:
-            st.warning(f"Pre-retirement allocation sums to {pre_total:.1%}, not 100% — will auto-normalize for simulation.")
-            config.pre_retirement_allocation = normalize_allocation(
-                config.pre_retirement_allocation
-            )
-            if st.button("Normalize Pre-Retirement Allocation"):
-                st.rerun()
+        config.pre_retirement_allocation = render_allocation_sliders(
+            config.pre_retirement_allocation, "", _lc,
+        )
+        render_allocation_status(
+            sum(config.pre_retirement_allocation.values()),
+            "Pre-Retirement", "pre_ret",
+            config.pre_retirement_allocation, "pre_retirement_allocation", config,
+        )
 
         st.write("**Retirement Allocation**")
-        col1, col2 = st.columns(2)
-        with col1:
-            config.retirement_allocation['us_large_cap'] = st.slider(
-                f"Ret. US Large Cap #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['us_large_cap'], step=0.01,
-            )
-            config.retirement_allocation['us_small_cap'] = st.slider(
-                f"Ret. US Small Cap #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['us_small_cap'], step=0.01,
-            )
-            config.retirement_allocation['international_dev'] = st.slider(
-                f"Ret. Intl Developed #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['international_dev'], step=0.01,
-            )
-            config.retirement_allocation['emerging_markets'] = st.slider(
-                f"Ret. Emerging Markets #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['emerging_markets'], step=0.01,
-            )
-        with col2:
-            config.retirement_allocation['us_bonds'] = st.slider(
-                f"Ret. US Bonds #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['us_bonds'], step=0.01,
-            )
-            config.retirement_allocation['tips'] = st.slider(
-                f"Ret. TIPS #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['tips'], step=0.01,
-            )
-            config.retirement_allocation['cash'] = st.slider(
-                f"Ret. Cash #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['cash'], step=0.01,
-            )
-            config.retirement_allocation['reits'] = st.slider(
-                f"Ret. REITs #{_lc}", 0.0, 1.0,
-                value=config.retirement_allocation['reits'], step=0.01,
-            )
-
-        ret_total = sum(config.retirement_allocation.values())
-        if abs(ret_total - 1.0) > 0.01:
-            st.warning(f"Retirement allocation sums to {ret_total:.1%}, not 100% — will auto-normalize for simulation.")
-            config.retirement_allocation = normalize_allocation(
-                config.retirement_allocation
-            )
-            if st.button("Normalize Retirement Allocation"):
-                st.rerun()
+        config.retirement_allocation = render_allocation_sliders(
+            config.retirement_allocation, "Ret.", _lc,
+        )
+        render_allocation_status(
+            sum(config.retirement_allocation.values()),
+            "Retirement", "ret",
+            config.retirement_allocation, "retirement_allocation", config,
+        )
 
         config.use_glide_path = st.checkbox(
             "Use Glide Path (gradual transition)",
@@ -836,11 +845,12 @@ def build_sidebar_config(containers=None) -> SimulationConfig:
             _age = config.current_age + (yr - config.simulation_start_year)
             with _col:
                 val = st.number_input(
-                    f"SERP {yr} #{_lc}",
+                    f"SERP {yr}",
                     min_value=0.0,
                     value=float(getattr(config, f'serp_{yr}')),
                     step=5000.0,
                     format="%.0f",
+                    key=f"serp_{yr}_{_lc}",
                 )
                 st.caption(f"age {_age}")
                 setattr(config, f'serp_{yr}', val)
@@ -952,6 +962,20 @@ def build_sidebar_config(containers=None) -> SimulationConfig:
 
 def _run_simulation(config):
     """Execute Monte Carlo simulation and cache results in session state."""
+    # ── Pre-simulation guard: block if any allocation deviates too far ──
+    _alloc_groups = [
+        ("Pre-Retirement", config.pre_retirement_allocation),
+        ("Retirement", config.retirement_allocation),
+    ]
+    for _label, _alloc in _alloc_groups:
+        _total = sum(_alloc.values())
+        if abs(_total - 1.0) > _ALLOC_TOLERANCE:
+            st.error(
+                f"{_label} allocation sums to {_total:.1%} — must be within "
+                f"{_ALLOC_TOLERANCE:.0%} of 100%. Adjust sliders or click Auto-fix before running."
+            )
+            return
+
     st.session_state.config_cache = config
     st.session_state.simulation_results = None
 
