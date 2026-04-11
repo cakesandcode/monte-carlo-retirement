@@ -227,7 +227,8 @@ class SimulationConfig:
 
     # Social Security
     ss_monthly_benefit_at_fra: float = 2500.0
-    ss_fra: int = 67
+    ss_fra: float = 67.0
+    career_start_age: int = 30  # Age career/investing began (for glide path)
     ss_claiming_age: int = 67
     spouse_ss_monthly_benefit_at_fra: float = 0.0
     spouse_ss_claiming_age: int = 67

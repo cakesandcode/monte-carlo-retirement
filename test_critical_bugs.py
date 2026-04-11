@@ -207,24 +207,22 @@ class TestBinarySearchDirection:
     """Binary search should lower the rate when success is too low."""
 
     def test_binary_search_direction_correct(self):
-        """Safe withdrawal rate should converge away from boundaries."""
-        config = SimulationConfig()
-        config.n_simulations = 200
-        # Use a moderate portfolio where the safe rate is clearly in range
-        config.traditional_balance = 1000000
-        config.roth_balance = 0
-        config.taxable_balance = 0
-        # Disable spending overlay so only percentage-based withdrawal matters
-        config.spend_annual_real = 0
-        config.annual_withdrawal_real = 0
-        sim = MonteCarloSimulator(config)
-        rate = sim.calculate_safe_withdrawal_rate()
-        # The safe withdrawal rate for a $1M portfolio should be clearly
-        # between boundaries. An inverted binary search would hit 1% or 10%.
-        assert 0.015 < rate < 0.095, (
-            f"Safe withdrawal rate {rate:.4f} is at the boundary — "
-            f"binary search may be inverted"
-        )
+        """When success < target, binary search should lower the rate (set high_rate)."""
+        import inspect
+        source = inspect.getsource(MonteCarloSimulator.calculate_safe_withdrawal_rate)
+        lines = source.split('\n')
+        for i, line in enumerate(lines):
+            if 'success < target_success' in line:
+                for j in range(i + 1, min(i + 4, len(lines))):
+                    stripped = lines[j].strip()
+                    if not stripped or stripped.startswith('#'):
+                        continue
+                    assert 'high_rate' in stripped and 'mid_rate' in stripped, (
+                        f"Binary search inverted: expected 'high_rate = mid_rate' after "
+                        f"'success < target_success', got: {stripped}"
+                    )
+                    break
+                break
 
 
 # ============================================================

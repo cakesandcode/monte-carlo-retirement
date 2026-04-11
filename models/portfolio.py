@@ -178,7 +178,8 @@ class PortfolioMechanics:
         current_age: int,
         retirement_age: int,
         pre_allocation: Dict[str, float],
-        retirement_allocation: Dict[str, float]
+        retirement_allocation: Dict[str, float],
+        career_start_age: int = 30,
     ) -> Dict[str, float]:
         """
         Interpolate asset allocation along glide path.
@@ -192,6 +193,8 @@ class PortfolioMechanics:
             retirement_age: Age at which full glide-path completion occurs.
             pre_allocation: Target allocation pre-retirement {asset_class: weight}.
             retirement_allocation: Target allocation at/after retirement.
+            career_start_age: Age at which career (and glide path) begins.
+                Defaults to 30.
 
         Returns:
             Dict with interpolated allocation weights, keys=ASSET_CLASSES.
@@ -199,12 +202,12 @@ class PortfolioMechanics:
         if current_age >= retirement_age:
             return retirement_allocation.copy()
 
-        if current_age >= retirement_age:
-            return retirement_allocation.copy()
-
-        # Linear interpolation
+        # Linear interpolation from career_start_age to retirement_age.
+        # career_start_age defaults to 30 if not provided.
         years_to_retirement = retirement_age - current_age
-        total_career_years = retirement_age - (retirement_age - 35)  # Assume 35-year career
+        total_career_years = retirement_age - career_start_age
+        if total_career_years <= 0:
+            total_career_years = 1  # Guard against zero/negative career span
         glide_progress = (total_career_years - years_to_retirement) / total_career_years
 
         glide_progress = np.clip(glide_progress, 0.0, 1.0)
@@ -401,7 +404,8 @@ class PortfolioMechanics:
                 age,
                 config.retirement_age,
                 config.pre_retirement_allocation,
-                config.retirement_allocation
+                config.retirement_allocation,
+                career_start_age=getattr(config, 'career_start_age', 30),
             )
         else:
             allocation = (
@@ -414,6 +418,11 @@ class PortfolioMechanics:
             allocation,
             label=f"age-{age} allocation",
         )
+
+        # ── Capture prior-year-end traditional balance for RMD ──────────
+        # IRS requires RMD to be based on Dec 31 balance of the PRIOR year.
+        # Contributions added below are CURRENT-year and must not inflate RMD.
+        _prior_year_traditional = traditional
 
         # STEP 1: Add contributions
         # Primary earner: contributes until retirement_age.
@@ -454,9 +463,10 @@ class PortfolioMechanics:
             roth += roth_contrib
 
         # STEP 2: Calculate RMD (single household RMD on combined traditional)
+        # Uses prior-year-end balance per IRS rules (not post-contribution balance).
         rmd_amount = 0.0
         if is_retired:
-            rmd_amount = self.calculate_rmd(age, traditional)
+            rmd_amount = self.calculate_rmd(age, _prior_year_traditional)
 
         # STEP 3: Determine target withdrawal.
         withdrawal_start = getattr(config, 'withdrawal_start_age', config.retirement_age)
