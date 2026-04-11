@@ -228,6 +228,7 @@ class MonteCarloSimulator:
 
                 # Calculate healthcare costs and subtract from portfolio
                 annual_healthcare = 0.0
+                _hc_trad_draw = 0.0
                 if self.config.include_healthcare_costs and is_retired:
                     _hc_is_real = getattr(self.config, 'healthcare_is_real', True)
                     if _hc_is_real:
@@ -237,19 +238,39 @@ class MonteCarloSimulator:
                         )
                     else:
                         annual_healthcare = self.config.annual_healthcare_cost_real
-                    _hc_total = trad_bal + roth_bal + taxable_bal
-                    if _hc_total > 0 and annual_healthcare > 0:
-                        _hc_draw = min(annual_healthcare, _hc_total)
-                        _hc_frac = _hc_draw / _hc_total
-                        trad_bal    -= trad_bal * _hc_frac
-                        roth_bal    -= roth_bal * _hc_frac
-                        taxable_bal -= taxable_bal * _hc_frac
-                        total_portfolio -= _hc_draw
+                    # Ordered draw for healthcare: taxable -> traditional -> roth.
+                    # Healthcare is a non-discretionary expense; draw from
+                    # tax-inefficient accounts first, preserving Roth tax-free growth.
+                    _hc_remaining = min(annual_healthcare, trad_bal + roth_bal + taxable_bal)
+                    _hc_drawn = 0.0
+                    _hc_trad_draw = 0.0
+
+                    if _hc_remaining > 0 and taxable_bal > 0:
+                        _hc_take = min(_hc_remaining, taxable_bal)
+                        taxable_bal -= _hc_take
+                        _hc_remaining -= _hc_take
+                        _hc_drawn += _hc_take
+
+                    if _hc_remaining > 0 and trad_bal > 0:
+                        _hc_take = min(_hc_remaining, trad_bal)
+                        trad_bal -= _hc_take
+                        _hc_remaining -= _hc_take
+                        _hc_drawn += _hc_take
+                        _hc_trad_draw += _hc_take
+
+                    if _hc_remaining > 0 and roth_bal > 0:
+                        _hc_take = min(_hc_remaining, roth_bal)
+                        roth_bal -= _hc_take
+                        _hc_remaining -= _hc_take
+                        _hc_drawn += _hc_take
+
+                    total_portfolio -= _hc_drawn
 
                 # Use actual per-bucket withdrawal amounts from portfolio.py
                 trad_withdraw = _actual_trad_withdraw
                 roth_withdraw = _actual_roth_withdraw
                 taxable_withdraw = _actual_taxable_withdraw
+                trad_withdraw_for_tax = trad_withdraw + _hc_trad_draw
 
                 # Estimate embedded capital gains using cost basis tracking.
                 if taxable_bal > 0 and taxable_withdraw > 0:
@@ -265,7 +286,7 @@ class MonteCarloSimulator:
                 # Calculate taxes
                 # RMD is already included in gross_withdrawal (from portfolio.py),
                 # so subtract it from trad_withdraw to avoid double-counting.
-                _trad_withdraw_for_tax = max(0.0, trad_withdraw - rmd_amount)
+                _trad_withdraw_for_tax = max(0.0, trad_withdraw_for_tax - rmd_amount)
 
                 tax_result = self.tax_calc.calculate_annual_tax(
                     age=current_age,

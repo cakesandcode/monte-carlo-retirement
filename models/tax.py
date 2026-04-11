@@ -40,7 +40,8 @@ class TaxCalculator:
         TAX_BRACKETS_2025_MFJ: Federal brackets for married filing jointly.
         STANDARD_DEDUCTION_SINGLE: Single filer standard deduction (2025).
         STANDARD_DEDUCTION_MFJ: Married filing jointly standard deduction (2025).
-        STANDARD_DEDUCTION_65_PLUS: Additional deduction per person age 65+ (2025).
+        STANDARD_DEDUCTION_65_PLUS_SINGLE: Additional deduction for single filer age 65+ (2025).
+        STANDARD_DEDUCTION_65_PLUS_MFJ: Additional deduction per spouse age 65+ MFJ (2025).
         LTCG_RATE_ZERO: 0% LTCG income threshold for MFJ.
         LTCG_RATE_15: 15% LTCG income threshold (top of 15% bracket).
     """
@@ -69,7 +70,12 @@ class TaxCalculator:
     # 2025 Standard Deductions
     STANDARD_DEDUCTION_SINGLE = 15000
     STANDARD_DEDUCTION_MFJ = 30000
-    STANDARD_DEDUCTION_65_PLUS = 1550  # Per person age 65+
+    # IRS 2025: Additional standard deduction for age 65+
+    # Single/HOH filers: $1,950 per person
+    # MFJ filers: $1,550 per qualifying spouse
+    # Source: IRS Rev. Proc. 2024-40, Section 3.01
+    STANDARD_DEDUCTION_65_PLUS_SINGLE = 1950  # Single filer age 65+
+    STANDARD_DEDUCTION_65_PLUS_MFJ = 1550     # Per spouse age 65+ (MFJ)
 
     # 2025 Long-Term Capital Gains Thresholds
     LTCG_RATE_ZERO_SINGLE = 47025
@@ -140,17 +146,18 @@ class TaxCalculator:
             )
 
         # Determine standard deduction
+        # IRS 2025: Single 65+ gets $1,950 additional; MFJ 65+ gets $1,550 per spouse.
         if filing_status == 'single':
             std_ded = self.STANDARD_DEDUCTION_SINGLE
             if age >= 65:
-                std_ded += self.STANDARD_DEDUCTION_65_PLUS
+                std_ded += self.STANDARD_DEDUCTION_65_PLUS_SINGLE
             brackets = self.TAX_BRACKETS_2025_SINGLE
         else:  # married_filing_jointly
             std_ded = self.STANDARD_DEDUCTION_MFJ
             if age >= 65:
-                std_ded += self.STANDARD_DEDUCTION_65_PLUS
+                std_ded += self.STANDARD_DEDUCTION_65_PLUS_MFJ
             if spouse_age is not None and spouse_age >= 65:
-                std_ded += self.STANDARD_DEDUCTION_65_PLUS
+                std_ded += self.STANDARD_DEDUCTION_65_PLUS_MFJ
             brackets = self.TAX_BRACKETS_2025_MFJ
 
         # Apply standard deduction
@@ -252,9 +259,13 @@ class TaxCalculator:
         ordinary_in_zero = min(ordinary_income, zero_threshold)
         remaining_zero = max(0.0, zero_threshold - ordinary_in_zero)
 
-        # LTCG stacked on top of ordinary income
+        # LTCG stacked on top of ordinary income.
+        # The 15% bracket spans from zero_threshold to fifteen_threshold.
+        # Ordinary income and ltcg_in_zero together occupy space up to
+        # (ordinary_income + ltcg_in_zero). The remaining 15% band is:
+        #   fifteen_threshold - ordinary_income - ltcg_in_zero
         ltcg_in_zero = min(ltcg_income, remaining_zero)
-        remaining_fifteen = max(0.0, fifteen_threshold - max(ordinary_income, zero_threshold) - ltcg_in_zero)
+        remaining_fifteen = max(0.0, fifteen_threshold - ordinary_income - ltcg_in_zero)
         ltcg_in_fifteen = min(ltcg_income - ltcg_in_zero, remaining_fifteen)
         ltcg_in_twenty = max(0.0, ltcg_income - ltcg_in_zero - ltcg_in_fifteen)
 
